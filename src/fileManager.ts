@@ -5,6 +5,7 @@ import { settingsStore } from '~/store';
 import { sanitizeTitle } from '~/utils/sanitizeTitle';
 import type { Article } from '~/models';
 import { frontMatterDocType, addFrontMatter } from "~/utils/frontmatter"
+import * as crypto from "node:crypto";
 
 type AnnotationFile = {
   articleUrl?: string;
@@ -13,12 +14,23 @@ type AnnotationFile = {
 
 const articleFolderPath = (article: Article): string => {
   const settings = get(settingsStore);
+  let folderPath = settings.highlightsFolder;
+
   if (settings.useDomainFolders) {
     // "metadata.author" is equal to the article domain at the moment
-    return `${settings.highlightsFolder}/${article.metadata.author}`;
+      folderPath = `${folderPath}/${article.metadata.author}`;
   }
 
-  return settings.highlightsFolder;
+  if (settings.usePathHashFolders) {
+      const pathname = new URL(article.metadata.url).pathname;
+      const pathHash = crypto.createHash('md5')
+          .update(pathname)
+          .digest()
+          .toString('base64url');
+      folderPath = `${folderPath}/${pathHash}`;
+  }
+
+  return folderPath;
 };
 
 export default class FileManager {

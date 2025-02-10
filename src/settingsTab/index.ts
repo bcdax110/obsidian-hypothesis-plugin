@@ -43,6 +43,7 @@ export class SettingsTab extends PluginSettingTab {
     this.autoSyncInterval();
     this.highlightsFolder();
     this.folderPath();
+    this.folderPathHash()
     this.syncOnBoot();
     this.dateFormat();
     this.template();
@@ -188,6 +189,19 @@ export class SettingsTab extends PluginSettingTab {
         .setValue(get(settingsStore).useDomainFolders)
         .onChange(async (value) => {
           await settingsStore.actions.setUseDomainFolder(value);
+        })
+    );
+  }
+
+  private folderPathHash(): void {
+    new Setting(this.containerEl)
+    .setName('Use path hash folders')
+    .setDesc('The generated file directory is based on the hash value of the path portion of the tagged URL (designed to prevent filename conflicts caused by identical webpage titles under different paths of a website).')
+    .addToggle((toggle) =>
+      toggle
+        .setValue(get(settingsStore).useDomainFolders)
+        .onChange(async (value) => {
+          await settingsStore.actions.setPathHashFolders(value);
         })
     );
   }
